@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Shift Optimizer Alfamidi</title>
+
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#d32f2f', // Alfamidi Red
+              800: '#9f1239',
+              900: '#881337',
+            },
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+            }
+          },
+          boxShadow: {
+            'glow': '0 10px 25px -5px rgba(211, 47, 47, 0.15), 0 8px 10px -6px rgba(211, 47, 47, 0.1)',
+            'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-800 antialiased selection:bg-brand-700 selection:text-white flex flex-col min-h-screen">
+
+  <!-- Global Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 border border-slate-100">
+      <div class="relative flex items-center justify-center mb-4">
+        <div class="w-12 h-12 rounded-full border-4 border-slate-100 border-t-brand-700 animate-spin"></div>
+        <i class="fa-solid fa-store text-brand-700 text-sm absolute"></i>
+      </div>
+      <p id="loadingText" class="text-sm font-semibold text-slate-700 text-center">Memuat data...</p>
+      <p class="text-xs text-slate-400 mt-1 text-center">AI Shift Optimizer Alfamidi</p>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden transform transition-all duration-300 translate-y-2">
+    <div id="toastContent" class="flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-white text-sm font-medium border border-white/10 max-w-md">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-base"></i>
+      <span id="toastMessage">Notifikasi berhasil</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: SELECT STORE -->
+  <div id="screenSelectStore" class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-brand-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-brand-700/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center z-10 px-4">
+      <div class="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-glow">
+        <div class="bg-brand-700 text-white p-3 rounded-xl font-black text-xl tracking-wider shadow-md">
+          ALFAMIDI
+        </div>
+      </div>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
+        AI SHIFT OPTIMIZER
+      </h1>
+      <p class="mt-2 text-sm text-slate-300 font-medium tracking-wide uppercase">
+        Store Shift Management Platform
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-lg px-4 z-10">
+      <div class="bg-white/95 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl border border-white/20 sm:px-8">
+        <div class="space-y-4">
+          <div>
+            <label for="inputSearchStore" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Cari Toko Alfamidi
+            </label>
+            <div class="relative rounded-xl shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </div>
+              <input type="text" id="inputSearchStore" oninput="handleSearchStore()"
+                     class="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all"
+                     placeholder="Ketik Kode Toko (misal: M001) atau Nama Toko...">
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daftar Toko Tersedia</span>
+              <span class="text-xs text-brand-700 font-semibold bg-brand-50 px-2.5 py-0.5 rounded-full" id="storeCountBadge">0 Toko</span>
+            </div>
+            
+            <div class="store-list max-h-80 overflow-y-auto space-y-2.5 pr-1" id="storeList">
+              <!-- Store Cards Injection -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mt-6 text-center text-xs text-slate-400">
+        &copy; 2026 PT Midi Utama Indonesia Tbk. All rights reserved.
+      </p>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: DASHBOARD TOKO -->
+  <div id="screenDashboard" class="min-h-screen flex flex-col md:flex-row w-full bg-slate-50" style="display: none;">
+    <!-- Sidebar Desktop -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col border-r border-slate-800">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="bg-brand-700 text-white px-2.5 py-1 rounded-lg font-black text-sm tracking-wider">
+            MIDI
+          </div>
+          <div>
+            <h1 class="text-white font-bold text-sm tracking-tight leading-none">SHIFT OPTIMIZER</h1>
+            <p class="text-[10px] text-slate-400 font-semibold mt-0.5">ALFAMIDI DASHBOARD</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <div class="px-3 py-2 text-[10px] font-bold tracking-wider text-slate-500 uppercase">Menu Utama</div>
+        
+        <button onclick="switchTab('profile')" id="nav-profile" 
+                class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-left">
+          <i class="fa-solid fa-store w-4 text-center text-slate-400"></i>
+          <span>Profil Toko</span>
+        </button>
+
+        <button onclick="switchTab('operation')" id="nav-operation" 
+                class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-left">
+          <i class="fa-regular fa-clock w-4 text-center text-slate-400"></i>
+          <span>Jam Operasional</span>
+        </button>
+
+        <button onclick="switchTab('personnel')" id="nav-personnel" 
+                class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-left">
+          <i class="fa-solid fa-users w-4 text-center text-slate-400"></i>
+          <span>Personil Toko</span>
+        </button>
+
+        <button onclick="switchTab('shift')" id="nav-shift" 
+                class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-left">
+          <i class="fa-solid fa-calendar-days w-4 text-center text-slate-400"></i>
+          <span>Shift Library</span>
+        </button>
+
+        <button onclick="switchTab('simulation')" id="nav-simulation" 
+                class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-left">
+          <i class="fa-solid fa-wand-magic-sparkles w-4 text-center text-amber-400"></i>
+          <span class="text-amber-300 font-bold">Simulasi Master Shift</span>
+        </button>
+      </nav>
+
+      <!-- Active Store Status Widget -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-bold text-slate-500 uppercase">Toko Aktif</span>
+          <button onclick="switchStore()" class="text-[10px] font-bold text-brand-500 hover:underline">Ganti Toko</button>
+        </div>
+        <div class="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
+          <h4 id="sidebarStoreName" class="text-xs font-bold text-white truncate">-</h4>
+          <p id="sidebarStoreCode" class="text-[10px] text-slate-400 font-semibold mt-0.5">-</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <!-- Top Header -->
+      <header class="bg-white border-b border-slate-200/80 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="headerStoreBadge" class="bg-brand-50 text-brand-700 text-xs font-extrabold px-2 py-0.5 rounded border border-brand-200/60">-</span>
+            <h2 id="mobileStoreTitle" class="text-sm font-bold text-slate-900 truncate">-</h2>
+          </div>
+          <p id="activeStoreCodeAddress" class="text-xs text-slate-500 truncate mt-0.5">-</p>
+        </div>
+      </header>
+
+      <!-- Content Views -->
+      <div class="p-6 max-w-7xl w-full mx-auto space-y-6">
+        
+        <!-- TAB 1: PROFIL TOKO -->
+        <div id="tab-profile" class="tab-content animate-fade-in space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-store text-brand-700"></i> Detail Informasi Master Toko
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Kode Toko</p>
+                <p id="profKodeToko" class="text-sm font-bold text-slate-900 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Nama Toko</p>
+                <p id="profNamaToko" class="text-sm font-bold text-slate-900 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Sales Harian Target</p>
+                <p id="profSalesHarian" class="text-sm font-bold text-emerald-600 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Peak Hours Utama</p>
+                <p id="profPeakHours" class="text-sm font-bold text-amber-600 mt-0.5">-</p>
+              </div>
+              <div class="sm:col-span-2">
+                <p class="text-xs text-slate-400 font-medium">Alamat Lengkap</p>
+                <p id="profAlamat" class="text-sm font-medium text-slate-700 mt-0.5">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: JAM OPERASIONAL -->
+        <div id="tab-operation" class="tab-content animate-fade-in space-y-6" style="display: none;">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card p-6 max-w-xl">
+            <h3 class="text-sm font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+              <i class="fa-regular fa-clock text-brand-700"></i> Pengaturan Jam Operasional Toko
+            </h3>
+            <form id="formOperation" onsubmit="handleSaveOperation(event)" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label for="opJamBuka" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jam Buka Toko</label>
+                  <input type="text" id="opJamBuka" placeholder="07:00" required
+                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                </div>
+                <div>
+                  <label for="opJamTutup" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jam Tutup Toko</label>
+                  <input type="text" id="opJamTutup" placeholder="23:00" required
+                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                </div>
+              </div>
+
+              <div>
+                <label for="opToko24Jam" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Status Toko 24 Jam</label>
+                <select id="opToko24Jam" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                  <option value="TIDAK">TIDAK (2 Shift Utama)</option>
+                  <option value="YA">YA (3 Shift Utama Coverage 24 Jam)</option>
+                </select>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-all">
+                  Simpan Jam Operasional
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- TAB 3: PERSONIL TOKO -->
+        <div id="tab-personnel" class="tab-content animate-fade-in space-y-6" style="display: none;">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-users text-brand-700"></i> Daftar Personil Toko
+              </h3>
+              <button onclick="openAddPersonnelModal()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm">
+                <i class="fa-solid fa-plus mr-1"></i> Tambah Personil
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="px-6 py-3.5">Nama Personil</th>
+                    <th class="px-6 py-3.5">Jabatan</th>
+                    <th class="px-6 py-3.5">Gender</th>
+                    <th class="px-6 py-3.5">Status</th>
+                    <th class="px-6 py-3.5 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblPersonnel" class="divide-y divide-slate-100 text-xs">
+                  <!-- Employees Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: SHIFT LIBRARY -->
+        <div id="tab-shift" class="tab-content animate-fade-in space-y-6" style="display: none;">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-calendar-days text-brand-700"></i> Shift Library Resmi Alfamidi
+              </h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="px-6 py-3.5">Kode Shift</th>
+                    <th class="px-6 py-3.5">Jam Masuk</th>
+                    <th class="px-6 py-3.5">Jam Pulang</th>
+                    <th class="px-6 py-3.5">Durasi</th>
+                  </tr>
+                </thead>
+                <tbody id="tblShiftLibrary" class="divide-y divide-slate-100 text-xs">
+                  <!-- Shift Library Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: SIMULASI MASTER SHIFT -->
+        <div id="tab-simulation" class="tab-content animate-fade-in space-y-6" style="display: none;">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                Simulasi Master Shift AI & Code.gs Validator
+              </h3>
+              <p class="text-xs text-slate-500">Generasi alokasi shift otomatis periode custom (5+1 OFF & Wajib Pejabat per Shift)</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              <i class="fa-solid fa-shield-halved"></i>
+              Business Rules Validator Active
+            </span>
+          </div>
+
+          <!-- Store Roster Health Summary Banner -->
+          <div id="simRosterHealthCard" class="bg-slate-900 text-white rounded-2xl p-4 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-slate-800">
+            <div class="flex items-center gap-3">
+              <div class="p-3 bg-brand-700/20 border border-brand-500/30 rounded-xl text-brand-400">
+                <i class="fa-solid fa-user-check text-xl"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Roster Health Toko Aktif</h4>
+                <p id="healthStoreName" class="text-sm font-bold text-white mt-0.5">Semua Toko</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
+              <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+                <span class="text-slate-400">Total Active:</span>
+                <span id="healthTotalStaff" class="text-white font-bold ml-1">0</span>
+              </div>
+              <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+                <span class="text-amber-400 font-bold"><i class="fa-solid fa-user-shield mr-1"></i>Pejabat:</span>
+                <span id="healthPejabatCount" class="text-amber-300 font-bold ml-1">0</span>
+              </div>
+              <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+                <span class="text-slate-400"><i class="fa-solid fa-user-group mr-1"></i>Crew:</span>
+                <span id="healthCrewCount" class="text-white font-bold ml-1">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configuration & Action Card -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card p-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
+                <label for="simStartDate" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <i class="fa-regular fa-calendar-check mr-1 text-brand-700"></i> Tanggal Mulai
+                </label>
+                <input type="date" id="simStartDate" 
+                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+              </div>
+
+              <div>
+                <label for="simEndDate" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <i class="fa-regular fa-calendar-xmark mr-1 text-brand-700"></i> Tanggal Selesai
+                </label>
+                <input type="date" id="simEndDate" 
+                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+              </div>
+
+              <div>
+                <label for="simStoreSelect" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <i class="fa-solid fa-store mr-1 text-brand-700"></i> Target Toko
+                </label>
+                <select id="simStoreSelect" onchange="updateRosterHealthInfo()"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <div>
+                <button onclick="runShiftSimulation()" id="btnRunSim" 
+                        class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-700 to-rose-600 hover:from-brand-800 hover:to-rose-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Generate Simulasi Periode</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Realtime Progress Indicator Bar -->
+            <div id="simProgressContainer" class="mt-6 hidden border-t border-slate-100 pt-5 space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span id="simProgressStatus" class="text-slate-700">Memproses simulasi AI...</span>
+                <span id="simProgressPercent" class="text-brand-700">0%</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div id="simProgressBar" class="bg-gradient-to-r from-brand-700 to-amber-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <p id="simProgressDetail" class="text-[11px] text-slate-500 font-medium">Toko diproses: 0 / 0</p>
+            </div>
+
+            <!-- Business Rules Summary Highlights -->
+            <div class="mt-6 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-medium text-slate-600">
+              <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                <i class="fa-solid fa-user-clock text-indigo-600 text-sm"></i>
+                <span>Aturan Shifting: <strong>5 + 1 (1x OFF per minggu)</strong></span>
+              </div>
+              <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                <i class="fa-solid fa-user-shield text-brand-700 text-sm"></i>
+                <span>Mandatori Shift: <strong>Min 1 Pejabat (COS/ACOS/MD FRESH)</strong></span>
+              </div>
+              <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                <i class="fa-solid fa-wand-magic text-emerald-600 text-sm"></i>
+                <span>Validation Layer: <strong>Auto-Repair & Code.gs Engine</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulation Results Table Card -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-table-list text-brand-700"></i>
+                  Hasil Simulasi (Sheet SHIFT_RESULT)
+                </h4>
+                <p class="text-[11px] text-slate-400 mt-0.5">Tampilan data terverifikasi hasil simulasi shift yang dapat ditinjau sebelum dijadikan master shift resmi</p>
+              </div>
+              <button onclick="fetchShiftResults()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all self-start sm:self-auto">
+                <i class="fa-solid fa-rotate-right"></i> Refresh Data
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="px-6 py-3.5">Tanggal</th>
+                    <th class="px-6 py-3.5">Kode Toko</th>
+                    <th class="px-6 py-3.5">Nama Personil</th>
+                    <th class="px-6 py-3.5">Shift Assigned</th>
+                    <th class="px-6 py-3.5">AI Reasoning & Validation Note</th>
+                  </tr>
+                </thead>
+                <tbody id="tblSimResults" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                  <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+                      Pilih tanggal dan klik "Generate Simulasi Shift" untuk memulai proses AI & Validator.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT PERSONIL -->
+  <div id="modalPersonnel" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden transform transition-all animate-fade-in">
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <h3 id="modalPersonnelTitle" class="font-bold text-sm tracking-tight flex items-center gap-2">
+          <i class="fa-solid fa-user-gear text-brand-500"></i>
+          <span>Tambah Personil</span>
+        </h3>
+        <button onclick="closePersonnelModal()" class="text-slate-400 hover:text-white transition-all text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="formPersonnel" onsubmit="handleSavePersonnel(event)" class="p-6 space-y-4">
+        <input type="hidden" id="empOriginalNama">
+
+        <div>
+          <label for="empNama" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Nama Lengkap Personil
+          </label>
+          <input type="text" id="empNama" required placeholder="Contoh: AHMAD FAUZI"
+                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all uppercase">
+        </div>
+
+        <div>
+          <label for="empJabatan" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Jabatan
+          </label>
+          <select id="empJabatan" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+            <option value="COS">COS (Chief of Store)</option>
+            <option value="ACOS">ACOS (Assistant Chief of Store)</option>
+            <option value="MD FRESH">MD FRESH</option>
+            <option value="CREW">CREW</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="empGender" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Gender
+            </label>
+            <select id="empGender" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+              <option value="LAKI-LAKI">LAKI-LAKI</option>
+              <option value="PEREMPUAN">PEREMPUAN</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="empStatus" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Status
+            </label>
+            <select id="empStatus" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="NONACTIVE">NONACTIVE</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+          <button type="button" onclick="closePersonnelModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-all">
+            Simpan Data
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwTTGxafIKfUPs1H9oYDdWbxVD7-g8CTwyT0Xw_Or_yWZHp0k9xpA-ytH3TqLt2GIj1/exec';
+
+    let allStores = [];
+    let selectedStore = null;
+    let currentEmployees = [];
+    let isEditingPersonnel = false;
+    let isSimulating = false;
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatTime(val) {
+      if (!val) return '-';
+      const str = String(val).trim();
+      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)) {
+        const parts = str.split(':');
+        return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+      }
+      return str;
+    }
+
+    function formatCurrency(val) {
+      if (!val) return 'Belum tersedia';
+      const cleanDigits = String(val).replace(/[^\d]/g, '');
+      if (!cleanDigits) return val;
+      const num = parseInt(cleanDigits, 10);
+      return isNaN(num) ? val : `Rp ${num.toLocaleString('id-ID')}`;
+    }
+
+    function formatPeakHours(val) {
+      if (!val || val === '-') return 'Belum diatur';
+      return String(val).trim().replace(/\s*-\s*/g, ' - ');
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastContent = document.getElementById('toastContent');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastMessage = document.getElementById('toastMessage');
+
+      toastMessage.innerText = message;
+
+      if (type === 'error') {
+        toastContent.className = 'flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-white text-xs font-semibold bg-rose-600 border border-rose-500 max-w-md';
+        toastIcon.className = 'fa-solid fa-circle-exclamation text-base';
+      } else if (type === 'success') {
+        toastContent.className = 'flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-white text-xs font-semibold bg-emerald-600 border border-emerald-500 max-w-md';
+        toastIcon.className = 'fa-solid fa-circle-check text-base';
+      } else {
+        toastContent.className = 'flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-white text-xs font-semibold bg-slate-900 border border-slate-800 max-w-md';
+        toastIcon.className = 'fa-solid fa-circle-info text-base';
+      }
+
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function showLoading(msg = 'Memuat data...') {
+      document.getElementById('loadingText').innerText = msg;
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    async function fetchStores() {
+      showLoading('Memuat daftar toko...');
+      const container = document.getElementById('storeList');
+      try {
+        const res = await fetch(`${API_URL}?action=getStores`);
+        const result = await res.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          allStores = result.data;
+          renderStoreList(allStores);
+        } else {
+          container.innerHTML = `<p class="p-4 text-xs text-rose-500 text-center">Gagal memuat toko.</p>`;
+        }
+      } catch (err) {
+        container.innerHTML = `<p class="p-4 text-xs text-rose-500 text-center">Gagal terhubung ke backend.</p>`;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function renderStoreList(stores) {
+      const container = document.getElementById('storeList');
+      document.getElementById('storeCountBadge').innerText = `${stores ? stores.length : 0} Toko`;
+
+      if (!stores || stores.length === 0) {
+        container.innerHTML = `<p class="p-4 text-xs text-slate-400 text-center">Tidak ada data toko.</p>`;
+        return;
+      }
+
+      container.innerHTML = stores.map(store => `
+        <div onclick="selectStore('${escapeHtml(store.KODE_TOKO)}')"
+             class="group p-3.5 bg-slate-50 hover:bg-brand-50/50 border border-slate-200 hover:border-brand-200 rounded-xl transition-all cursor-pointer flex items-center justify-between">
+          <div class="min-w-0 pr-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-extrabold text-brand-700 bg-brand-100 px-2 py-0.5 rounded-md">${escapeHtml(store.KODE_TOKO)}</span>
+              <h3 class="text-xs font-bold text-slate-800 truncate group-hover:text-brand-700 transition-colors">${escapeHtml(store.NAMA_TOKO)}</h3>
+            </div>
+            <p class="text-[11px] text-slate-500 truncate mt-1">${escapeHtml(store.ALAMAT || 'Alamat tidak tersedia')}</p>
+          </div>
+          <div class="text-slate-300 group-hover:text-brand-700 transition-colors pl-2">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleSearchStore() {
+      const q = document.getElementById('inputSearchStore').value.toLowerCase().trim();
+      const filtered = allStores.filter(s => 
+        (s.KODE_TOKO && s.KODE_TOKO.toLowerCase().includes(q)) ||
+        (s.NAMA_TOKO && s.NAMA_TOKO.toLowerCase().includes(q))
+      );
+      renderStoreList(filtered);
+    }
+
+    async function selectStore(kodeToko) {
+      selectedStore = allStores.find(s => s.KODE_TOKO === kodeToko);
+      if (!selectedStore) return;
+
+      document.getElementById('screenSelectStore').style.display = 'none';
+      document.getElementById('screenDashboard').style.display = 'flex';
+
+      document.getElementById('mobileStoreTitle').innerText = selectedStore.NAMA_TOKO;
+      document.getElementById('headerStoreBadge').innerText = selectedStore.KODE_TOKO;
+      document.getElementById('activeStoreCodeAddress').innerText = `${selectedStore.KODE_TOKO} • ${selectedStore.ALAMAT || '-'}`;
+
+      document.getElementById('sidebarStoreName').innerText = selectedStore.NAMA_TOKO;
+      document.getElementById('sidebarStoreCode').innerText = selectedStore.KODE_TOKO;
+
+      document.getElementById('profKodeToko').innerText = selectedStore.KODE_TOKO || '-';
+      document.getElementById('profNamaToko').innerText = selectedStore.NAMA_TOKO || '-';
+      document.getElementById('profAlamat').innerText = selectedStore.ALAMAT || '-';
+      document.getElementById('profSalesHarian').innerText = formatCurrency(selectedStore.SALES_HARIAN);
+      document.getElementById('profPeakHours').innerText = formatPeakHours(selectedStore.PEAK_HOURS);
+
+      switchTab('profile');
+      loadAllStoreData(selectedStore.KODE_TOKO);
+    }
+
+    async function loadAllStoreData(kodeToko) {
+      showLoading('Memuat detail data toko...');
+      try {
+        const res = await fetch(`${API_URL}?action=getStoreDetails&kodeToko=${kodeToko}`);
+        const result = await res.json();
+
+        if (result.success && result.data) {
+          const op = result.data.operation;
+          if (op) {
+            document.getElementById('opJamBuka').value = formatTime(op.JAM_BUKA);
+            document.getElementById('opJamTutup').value = formatTime(op.JAM_TUTUP);
+            document.getElementById('opToko24Jam').value = op.TOKO_24_JAM || 'TIDAK';
+          }
+          currentEmployees = result.data.employees || [];
+          renderEmployees(currentEmployees);
+          renderShiftLibrary(result.data.shiftLibrary || []);
+        }
+      } catch (err) {
+        showToast('Gagal memuat detail toko', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function switchStore() {
+      selectedStore = null;
+      document.getElementById('screenDashboard').style.display = 'none';
+      document.getElementById('screenSelectStore').style.display = 'flex';
+    }
+
+    function switchTab(tabId) {
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.style.display = 'none');
+
+      const activeTab = document.getElementById(`tab-${tabId}`);
+      if (activeTab) {
+        activeTab.style.display = 'block';
+      }
+
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.classList.remove('bg-slate-800', 'text-white');
+        item.classList.add('text-slate-300');
+      });
+
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-300');
+        activeNav.classList.add('bg-slate-800', 'text-white');
+      }
+
+      if (tabId === 'simulation') {
+        populateSimStoreSelect();
+        updateRosterHealthInfo();
+        fetchShiftResults();
+      }
+    }
+
+    function updateRosterHealthInfo() {
+      const select = document.getElementById('simStoreSelect');
+      const target = select ? select.value : 'ALL';
+
+      const healthStoreName = document.getElementById('healthStoreName');
+      const healthTotalStaff = document.getElementById('healthTotalStaff');
+      const healthPejabatCount = document.getElementById('healthPejabatCount');
+      const healthCrewCount = document.getElementById('healthCrewCount');
+
+      if (target === 'ALL') {
+        if (healthStoreName) healthStoreName.innerText = `Semua Toko (${allStores.length} Toko)`;
+        if (healthTotalStaff) healthTotalStaff.innerText = currentEmployees ? currentEmployees.length : '-';
+        if (healthPejabatCount) healthPejabatCount.innerText = '-';
+        if (healthCrewCount) healthCrewCount.innerText = '-';
+      } else {
+        const storeObj = allStores.find(s => s.KODE_TOKO === target);
+        if (healthStoreName) healthStoreName.innerText = storeObj ? `${storeObj.KODE_TOKO} - ${storeObj.NAMA_TOKO}` : target;
+
+        const activeEmps = currentEmployees.filter(e => String(e.STATUS).toUpperCase() === 'ACTIVE');
+        const pejabatEmps = activeEmps.filter(e => ['COS', 'ACOS', 'MD FRESH'].includes(String(e.JABATAN).toUpperCase()));
+        const crewEmps = activeEmps.filter(e => !['COS', 'ACOS', 'MD FRESH'].includes(String(e.JABATAN).toUpperCase()));
+
+        if (healthTotalStaff) healthTotalStaff.innerText = activeEmps.length;
+        if (healthPejabatCount) healthPejabatCount.innerText = pejabatEmps.length;
+        if (healthCrewCount) healthCrewCount.innerText = crewEmps.length;
+      }
+    }
+
+    function renderSimulationResults(list) {
+      const tbody = document.getElementById('tblSimResults');
+      if (!tbody) return;
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+              Belum ada hasil simulasi shift untuk periode ini. Klik "Generate Simulasi Periode".
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => {
+        const isOFF = item.SHIFT === 'OFF' || item.SHIFT === 'LIBUR';
+        const isManpowerAlert = item.SHIFT === 'MANPOWER INSUFFICIENT';
+        const isDataIncomplete = item.SHIFT === 'DATA INCOMPLETE';
+        const isValidationFailed = item.SHIFT === 'VALIDATION FAILED';
+        const isAlert = isManpowerAlert || isDataIncomplete || isValidationFailed;
+        const isAutoRepaired = item.ALASAN && item.ALASAN.includes('Auto-repaired');
+
+        let badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        if (isOFF) badgeStyle = 'bg-slate-200 text-slate-700 border-slate-300 font-bold';
+        if (isManpowerAlert) badgeStyle = 'bg-rose-100 text-rose-700 border-rose-200 font-bold';
+        if (isDataIncomplete) badgeStyle = 'bg-amber-100 text-amber-800 border-amber-200 font-bold';
+        if (isValidationFailed) badgeStyle = 'bg-purple-100 text-purple-800 border-purple-200 font-bold';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors ${isAlert ? 'bg-rose-50/30' : ''} ${isOFF ? 'bg-slate-50/40' : ''}">
+            <td class="px-6 py-4 font-semibold text-slate-700 whitespace-nowrap">${escapeHtml(item.TANGGAL)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="font-extrabold text-brand-700 bg-brand-50 border border-brand-100 px-2 py-0.5 rounded-md text-[11px]">
+                ${escapeHtml(item.KODE_TOKO)}
+              </span>
+            </td>
+            <td class="px-6 py-4 font-bold ${item.NAMA_PERSONIL === 'SYSTEM_ALERT' ? 'text-rose-600' : 'text-slate-900'} whitespace-nowrap">
+              ${escapeHtml(item.NAMA_PERSONIL)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-black tracking-wider border ${badgeStyle}">
+                ${escapeHtml(item.SHIFT)}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-xs ${isAlert ? 'text-rose-700 font-semibold' : 'text-slate-600'} leading-relaxed">
+              ${isAutoRepaired ? '<span class="inline-flex items-center gap-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold mr-1"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Repaired</span>' : ''}
+              ${escapeHtml(item.ALASAN)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderEmployees(list) {
+      const tbody = document.getElementById('tblPersonnel');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada personil.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map(emp => `
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="px-6 py-4 font-bold text-slate-900">${escapeHtml(emp.NAMA_PERSONIL)}</td>
+          <td class="px-6 py-4"><span class="px-2 py-0.5 rounded bg-slate-100 font-bold">${escapeHtml(emp.JABATAN)}</span></td>
+          <td class="px-6 py-4">${escapeHtml(emp.GENDER)}</td>
+          <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${emp.STATUS === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${escapeHtml(emp.STATUS)}</span></td>
+          <td class="px-6 py-4 text-right">
+            <button onclick="openEditPersonnelModal('${escapeHtml(emp.NAMA_PERSONIL)}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-bold">Edit</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderShiftLibrary(shifts) {
+      const tbody = document.getElementById('tblShiftLibrary');
+      if (!shifts || shifts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Shift library kosong.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = shifts.map(s => `
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="px-6 py-3.5 font-bold text-brand-700">${escapeHtml(s.SHIFT)}</td>
+          <td class="px-6 py-3.5 font-bold">${escapeHtml(formatTime(s.JAM_MASUK))}</td>
+          <td class="px-6 py-3.5 font-bold">${escapeHtml(formatTime(s.JAM_PULANG))}</td>
+          <td class="px-6 py-3.5 text-slate-500">8 Jam</td>
+        </tr>
+      `).join('');
+    }
+
+    async function handleSaveOperation(e) {
+      e.preventDefault();
+      if (!selectedStore) return;
+      showLoading('Menyimpan jam operasional...');
+      try {
+        const payload = {
+          kodeToko: selectedStore.KODE_TOKO,
+          jamBuka: document.getElementById('opJamBuka').value,
+          jamTutup: document.getElementById('opJamTutup').value,
+          toko24Jam: document.getElementById('opToko24Jam').value
+        };
+        const res = await fetch(`${API_URL}?action=saveStoreOperation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        showToast(result.message || 'Berhasil disimpan', result.success ? 'success' : 'error');
+      } catch (err) {
+        showToast('Gagal menyimpan operasional', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function openAddPersonnelModal() {
+      isEditingPersonnel = false;
+      document.getElementById('modalPersonnelTitle').innerText = 'Tambah Personil Baru';
+      document.getElementById('formPersonnel').reset();
+      document.getElementById('empOriginalNama').value = '';
+      document.getElementById('modalPersonnel').classList.remove('hidden');
+    }
+
+    function openEditPersonnelModal(nama) {
+      const emp = currentEmployees.find(e => e.NAMA_PERSONIL === nama);
+      if (!emp) return;
+      isEditingPersonnel = true;
+      document.getElementById('modalPersonnelTitle').innerText = 'Edit Data Personil';
+      document.getElementById('empOriginalNama').value = emp.NAMA_PERSONIL;
+      document.getElementById('empNama').value = emp.NAMA_PERSONIL;
+      document.getElementById('empJabatan').value = emp.JABATAN;
+      document.getElementById('empGender').value = emp.GENDER;
+      document.getElementById('empStatus').value = emp.STATUS;
+      document.getElementById('modalPersonnel').classList.remove('hidden');
+    }
+
+    function closePersonnelModal() {
+      document.getElementById('modalPersonnel').classList.add('hidden');
+    }
+
+    async function handleSavePersonnel(e) {
+      e.preventDefault();
+      if (!selectedStore) return;
+      showLoading('Menyimpan personil...');
+      const payload = {
+        kodeToko: selectedStore.KODE_TOKO,
+        originalNama: document.getElementById('empOriginalNama').value,
+        namaPersonil: document.getElementById('empNama').value,
+        jabatan: document.getElementById('empJabatan').value,
+        gender: document.getElementById('empGender').value,
+        status: document.getElementById('empStatus').value
+      };
+      const action = isEditingPersonnel ? 'updateEmployee' : 'saveEmployee';
+      try {
+        const res = await fetch(`${API_URL}?action=${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        showToast(result.message, result.success ? 'success' : 'error');
+        if (result.success) {
+          closePersonnelModal();
+          loadAllStoreData(selectedStore.KODE_TOKO);
+        }
+      } catch (err) {
+        showToast('Gagal menyimpan personil', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function initSimulationDefaults() {
+      const today = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(today.getDate() + 6);
+
+      const startIso = today.toISOString().split('T')[0];
+      const endIso = nextWeek.toISOString().split('T')[0];
+
+      const startInput = document.getElementById('simStartDate');
+      const endInput = document.getElementById('simEndDate');
+
+      if (startInput && !startInput.value) startInput.value = startIso;
+      if (endInput && !endInput.value) endInput.value = endIso;
+    }
+
+    function populateSimStoreSelect() {
+      const select = document.getElementById('simStoreSelect');
+      if (!select) return;
+
+      const currentVal = select.value;
+      let html = `<option value="ALL">Semua Toko (ALL)</option>`;
+
+      if (Array.isArray(allStores) && allStores.length > 0) {
+        allStores.forEach(s => {
+          html += `<option value="${escapeHtml(s.KODE_TOKO)}">${escapeHtml(s.KODE_TOKO)} - ${escapeHtml(s.NAMA_TOKO)}</option>`;
+        });
+      }
+
+      select.innerHTML = html;
+      if (selectedStore && selectedStore.KODE_TOKO) {
+        select.value = selectedStore.KODE_TOKO;
+      } else if (currentVal) {
+        select.value = currentVal;
+      }
+    }
+
+    async function fetchShiftResults() {
+      const startDate = document.getElementById('simStartDate')?.value || '';
+      const endDate = document.getElementById('simEndDate')?.value || '';
+      const selectStore = document.getElementById('simStoreSelect')?.value || (selectedStore ? selectedStore.KODE_TOKO : 'ALL');
+
+      showLoading('Mengambil data hasil simulasi shift...');
+      try {
+        let url = `${API_URL}?action=getShiftResults&tanggal=${encodeURIComponent(startDate)}&tanggalSelesai=${encodeURIComponent(endDate)}`;
+        if (selectStore && selectStore !== 'ALL') {
+          url += `&kodeToko=${encodeURIComponent(selectStore)}`;
+        }
+
+        const res = await fetch(url);
+        const result = await res.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          renderSimulationResults(result.data);
+        } else {
+          showToast(result.message || 'Gagal mengambil hasil simulasi', 'error');
+          renderSimulationResults([]);
+        }
+      } catch (err) {
+        showToast('Gagal terhubung ke server saat mengambil hasil shift', 'error');
+        renderSimulationResults([]);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function runShiftSimulation() {
+      if (isSimulating) return;
+
+      const startDate = document.getElementById('simStartDate')?.value;
+      const endDate = document.getElementById('simEndDate')?.value;
+      const selectStore = document.getElementById('simStoreSelect')?.value || 'ALL';
+
+      if (!startDate || !endDate) {
+        showToast('Tanggal mulai dan tanggal selesai wajib diisi', 'error');
+        return;
+      }
+
+      if (startDate > endDate) {
+        showToast('Tanggal mulai tidak boleh lebih besar dari tanggal selesai', 'error');
+        return;
+      }
+
+      isSimulating = true;
+      const btn = document.getElementById('btnRunSim');
+      const progressContainer = document.getElementById('simProgressContainer');
+      const progressBar = document.getElementById('simProgressBar');
+      const progressStatus = document.getElementById('simProgressStatus');
+      const progressPercent = document.getElementById('simProgressPercent');
+      const progressDetail = document.getElementById('simProgressDetail');
+
+      if (btn) btn.disabled = true;
+      if (progressContainer) progressContainer.classList.remove('hidden');
+      if (progressBar) progressBar.style.width = '20%';
+      if (progressStatus) progressStatus.innerText = 'Mengirimkan permintaan simulasi AI...';
+      if (progressPercent) progressPercent.innerText = '20%';
+      if (progressDetail) progressDetail.innerText = 'Memproses permintaan di backend Google Apps Script...';
+
+      showLoading('Menjalankan simulasi shift AI & validasi...');
+
+      try {
+        const payload = {
+          tanggalMulai: startDate,
+          tanggalSelesai: endDate,
+          kodeToko: selectStore
+        };
+
+        if (progressBar) progressBar.style.width = '60%';
+        if (progressPercent) progressPercent.innerText = '60%';
+        if (progressStatus) progressStatus.innerText = 'AI sedang mengoptimasi jadwal shift & validasi aturan...';
+
+        const res = await fetch(`${API_URL}?action=generateSimulatedShifts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressPercent) progressPercent.innerText = '100%';
+
+        if (result.success) {
+          showToast(result.message || 'Simulasi shift berhasil dilakukan!', 'success');
+          if (Array.isArray(result.data)) {
+            renderSimulationResults(result.data);
+          } else {
+            await fetchShiftResults();
+          }
+        } else {
+          showToast(result.message || 'Gagal menjalankan simulasi', 'error');
+        }
+      } catch (err) {
+        showToast('Gagal menjalankan simulasi: ' + err.toString(), 'error');
+      } finally {
+        isSimulating = false;
+        if (btn) btn.disabled = false;
+        hideLoading();
+        setTimeout(() => {
+          if (progressContainer) progressContainer.classList.add('hidden');
+        }, 3000);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSimulationDefaults();
+      fetchStores();
+    });
+  </script>
+</body>
+</html>
