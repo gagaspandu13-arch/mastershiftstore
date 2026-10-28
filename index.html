@@ -11,6 +11,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- html2pdf Library for Printable PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -46,7 +49,6 @@
   </script>
 
   <style>
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -68,6 +70,21 @@
     }
     .animate-fade-in {
       animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #pdfExportContainer, #pdfExportContainer * {
+        visibility: visible;
+      }
+      #pdfExportContainer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -242,14 +259,10 @@
                 <p id="profNamaToko" class="text-sm font-bold text-slate-900 mt-0.5">-</p>
               </div>
               <div>
-                <p class="text-xs text-slate-400 font-medium">Sales Harian Target</p>
-                <p id="profSalesHarian" class="text-sm font-bold text-emerald-600 mt-0.5">-</p>
-              </div>
-              <div>
                 <p class="text-xs text-slate-400 font-medium">Peak Hours Utama</p>
                 <p id="profPeakHours" class="text-sm font-bold text-amber-600 mt-0.5">-</p>
               </div>
-              <div class="sm:col-span-2">
+              <div class="sm:col-span-3">
                 <p class="text-xs text-slate-400 font-medium">Alamat Lengkap</p>
                 <p id="profAlamat" class="text-sm font-medium text-slate-700 mt-0.5">-</p>
               </div>
@@ -264,25 +277,29 @@
               <i class="fa-regular fa-clock text-brand-700"></i> Pengaturan Jam Operasional Toko
             </h3>
             <form id="formOperation" onsubmit="handleSaveOperation(event)" class="space-y-4">
+              <div>
+                <label for="opToko24Jam" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Status Toko 24 Jam</label>
+                <select id="opToko24Jam" onchange="toggle24HourMode()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                  <option value="TIDAK">TIDAK (2 Shift Utama)</option>
+                  <option value="YA">YA (3 Shift Utama Coverage 24 Jam)</option>
+                </select>
+              </div>
+
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label for="opJamBuka" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jam Buka Toko</label>
                   <input type="text" id="opJamBuka" placeholder="07:00" required
-                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all disabled:bg-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed">
                 </div>
                 <div>
                   <label for="opJamTutup" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jam Tutup Toko</label>
                   <input type="text" id="opJamTutup" placeholder="23:00" required
-                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all disabled:bg-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed">
                 </div>
               </div>
 
-              <div>
-                <label for="opToko24Jam" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Status Toko 24 Jam</label>
-                <select id="opToko24Jam" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
-                  <option value="TIDAK">TIDAK (2 Shift Utama)</option>
-                  <option value="YA">YA (3 Shift Utama Coverage 24 Jam)</option>
-                </select>
+              <div id="twentyFourHourNote" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium">
+                <i class="fa-solid fa-lock mr-1.5 text-amber-600"></i> Mode 24 Jam Aktif: Jam buka & tutup terkunci otomatis di <strong>00:00 - 23:59</strong>.
               </div>
 
               <div class="pt-2">
@@ -312,6 +329,7 @@
                     <th class="px-6 py-3.5">Nama Personil</th>
                     <th class="px-6 py-3.5">Jabatan</th>
                     <th class="px-6 py-3.5">Gender</th>
+                    <th class="px-6 py-3.5">Off Terakhir</th>
                     <th class="px-6 py-3.5">Status</th>
                     <th class="px-6 py-3.5 text-right">Aksi</th>
                   </tr>
@@ -358,11 +376,11 @@
                 <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
                 Simulasi Master Shift AI & Code.gs Validator
               </h3>
-              <p class="text-xs text-slate-500">Generasi alokasi shift otomatis periode custom (5+1 OFF & Wajib Pejabat per Shift)</p>
+              <p class="text-xs text-slate-500">Generasi alokasi shift adil otomatis (Matriks Tanggal Menyamping & Auto Clean Reset Data Toko)</p>
             </div>
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
               <i class="fa-solid fa-shield-halved"></i>
-              Business Rules Validator Active
+              Fair Shifting Rules Active
             </span>
           </div>
 
@@ -426,7 +444,7 @@
                 <button onclick="runShiftSimulation()" id="btnRunSim" 
                         class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-700 to-rose-600 hover:from-brand-800 hover:to-rose-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                   <i class="fa-solid fa-play"></i>
-                  <span>Generate Simulasi Periode</span>
+                  <span>Generate & Clean Reset</span>
                 </button>
               </div>
             </div>
@@ -434,7 +452,7 @@
             <!-- Realtime Progress Indicator Bar -->
             <div id="simProgressContainer" class="mt-6 hidden border-t border-slate-100 pt-5 space-y-2">
               <div class="flex items-center justify-between text-xs font-bold">
-                <span id="simProgressStatus" class="text-slate-700">Memproses simulasi AI...</span>
+                <span id="simProgressStatus" class="text-slate-700">Membersihkan data lama & memproses simulasi AI...</span>
                 <span id="simProgressPercent" class="text-brand-700">0%</span>
               </div>
               <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
@@ -446,54 +464,167 @@
             <!-- Business Rules Summary Highlights -->
             <div class="mt-6 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-medium text-slate-600">
               <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-user-clock text-indigo-600 text-sm"></i>
-                <span>Aturan Shifting: <strong>5 + 1 (1x OFF per minggu)</strong></span>
+                <i class="fa-solid fa-scale-balanced text-indigo-600 text-sm"></i>
+                <span>Aturan Off Adil: <strong>1x OFF Terjadwal (Anti 2 Hari Consecutive)</strong></span>
               </div>
               <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                 <i class="fa-solid fa-user-shield text-brand-700 text-sm"></i>
                 <span>Mandatori Shift: <strong>Min 1 Pejabat (COS/ACOS/MD FRESH)</strong></span>
               </div>
               <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <i class="fa-solid fa-wand-magic text-emerald-600 text-sm"></i>
-                <span>Validation Layer: <strong>Auto-Repair & Code.gs Engine</strong></span>
+                <i class="fa-solid fa-broom text-rose-600 text-sm"></i>
+                <span>Auto Reset: <strong>Membersihkan Sheet SHIFT_RESULT Toko</strong></span>
               </div>
             </div>
           </div>
 
-          <!-- Simulation Results Table Card -->
+          <!-- Simulation Results Table Card (Matrix Horizontal View) -->
           <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                  <i class="fa-solid fa-table-list text-brand-700"></i>
-                  Hasil Simulasi (Sheet SHIFT_RESULT)
+                  <i class="fa-solid fa-table-cells text-brand-700"></i>
+                  Matriks Jadwal Master Shift Toko (Tanggal Menyamping)
                 </h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">Tampilan data terverifikasi hasil simulasi shift yang dapat ditinjau sebelum dijadikan master shift resmi</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Tampilan jadwal menyamping horizontal tanggal 1, 2, 3... agar mudah dibaca dan langsung dicetak.</p>
               </div>
-              <button onclick="fetchShiftResults()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all self-start sm:self-auto">
-                <i class="fa-solid fa-rotate-right"></i> Refresh Data
-              </button>
+
+              <div class="flex items-center gap-2 self-start sm:self-auto">
+                <button onclick="downloadRosterPDF()" id="btnDownloadPDF" disabled class="inline-flex items-center gap-2 px-3.5 py-2 bg-rose-700 hover:bg-rose-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm">
+                  <i class="fa-solid fa-file-pdf"></i>
+                  <span>Download PDF Jadwal</span>
+                </button>
+                <button onclick="fetchShiftResults()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+                  <i class="fa-solid fa-rotate-right"></i> Refresh Data
+                </button>
+              </div>
             </div>
 
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th class="px-6 py-3.5">Tanggal</th>
-                    <th class="px-6 py-3.5">Kode Toko</th>
-                    <th class="px-6 py-3.5">Nama Personil</th>
-                    <th class="px-6 py-3.5">Shift Assigned</th>
-                    <th class="px-6 py-3.5">AI Reasoning & Validation Note</th>
-                  </tr>
-                </thead>
-                <tbody id="tblSimResults" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                  <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-slate-400">
-                      Pilih tanggal dan klik "Generate Simulasi Shift" untuk memulai proses AI & Validator.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <!-- Horizontal Table Container -->
+            <div class="overflow-x-auto p-4" id="pdfExportContainer">
+              <div id="pdfHeader" class="hidden mb-4 p-4 border-b-2 border-slate-900 bg-slate-50">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h2 class="text-base font-black text-slate-900 uppercase tracking-tight">ALFAMIDI - JADWAL SHIFT KERJA PERSONIL TOKO</h2>
+                    <p id="pdfStoreName" class="text-xs font-bold text-brand-700 mt-0.5">TOKO: -</p>
+                  </div>
+                  <div class="text-right">
+                    <p id="pdfPeriod" class="text-xs font-bold text-slate-700">Periode: -</p>
+                    <p class="text-[10px] text-slate-500">Dicetak via AI Shift Optimizer Alfamidi</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Matrix Table Injection -->
+              <div id="matrixTableWrapper">
+                <p class="p-8 text-center text-xs text-slate-400">Pilih tanggal dan klik "Generate & Clean Reset" untuk memuat tabel shift menyamping.</p>
+              </div>
+
+              <!-- Shift Legend Footer for Printable Document -->
+              <div id="pdfLegend" class="mt-4 pt-3 border-t border-slate-200 text-[10px] text-slate-600 flex flex-wrap items-center gap-4">
+                <span class="font-bold uppercase tracking-wider text-slate-800">Keterangan Kode Shift:</span>
+                <span class="inline-flex items-center gap-1"><strong class="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-black">S07</strong> Shift Pagi (07.00 - 15.00)</span>
+                <span class="inline-flex items-center gap-1"><strong class="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-black">S14</strong> Shift Siang (14.00 - 22.00)</span>
+                <span class="inline-flex items-center gap-1"><strong class="px-1.5 py-0.5 bg-purple-100 text-purple-800 rounded font-black">S22</strong> Shift Malam (22.00 - 06.00)</span>
+                <span class="inline-flex items-center gap-1"><strong class="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded font-black">OFF</strong> Libur / Day Off</span>
+              </div>
+
+              <!-- ANALISA TAJAM KELAYAKAN TOKO & ROSTER HEALTH (DITAMPILKAN DIBAWAH TABEL) -->
+              <div id="analyticsSection" class="mt-6 pt-6 border-t-2 border-slate-200">
+                <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-lg border border-slate-800">
+                  <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                      <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">Analisa Audit Kelayakan Toko & Strategic Roster Health Insight</h3>
+                        <p class="text-[11px] text-slate-400">Evaluasi otomatis struktur tim, kecukupan pejabat, rasio gender, dan operasional toko.</p>
+                      </div>
+                    </div>
+                    <span id="overallHealthBadge" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300">
+                      Evaluasi Sistem...
+                    </span>
+                  </div>
+
+                  <!-- 4 Metric Cards -->
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+                    <!-- MPP Card -->
+                    <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                      <div class="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                        <span>ACTUAL MPP</span>
+                        <i class="fa-solid fa-users text-blue-400"></i>
+                      </div>
+                      <div id="statMppVal" class="text-xl font-extrabold text-white">0 Personil</div>
+                      <p id="statMppDesc" class="text-[10px] text-slate-400 mt-1">Status kecukupan staf</p>
+                    </div>
+
+                    <!-- Pejabat Card -->
+                    <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                      <div class="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                        <span>PEJABAT TOKO</span>
+                        <i class="fa-solid fa-user-shield text-amber-400"></i>
+                      </div>
+                      <div id="statPejabatVal" class="text-xl font-extrabold text-white">0 / 4 Ideal</div>
+                      <p id="statPejabatDesc" class="text-[10px] text-slate-400 mt-1">COS, ACOS, MD FRESH</p>
+                    </div>
+
+                    <!-- Gender Card -->
+                    <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                      <div class="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                        <span>RASIO GENDER</span>
+                        <i class="fa-solid fa-venus-mars text-rose-400"></i>
+                      </div>
+                      <div id="statGenderVal" class="text-xl font-extrabold text-white">0L / 0P</div>
+                      <p id="statGenderDesc" class="text-[10px] text-slate-400 mt-1">Ketersediaan Pria vs Wanita</p>
+                    </div>
+
+                    <!-- 24H Feasibility Card -->
+                    <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                      <div class="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                        <span>KELAYAKAN 24 JAM</span>
+                        <i class="fa-solid fa-business-time text-emerald-400"></i>
+                      </div>
+                      <div id="stat24hVal" class="text-xl font-extrabold text-white">-</div>
+                      <p id="stat24hDesc" class="text-[10px] text-slate-400 mt-1">Ketahanan Shift Malam</p>
+                    </div>
+                  </div>
+
+                  <!-- Detailed Analysis Narrative Output -->
+                  <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3 text-xs leading-relaxed text-slate-300">
+                    <div>
+                      <h4 class="font-bold text-amber-400 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-shield-halved"></i> 1. Analisa Struktur & Rasio Pejabat Toko (COS / ACOS / MD FRESH)
+                      </h4>
+                      <p id="analysisPejabatText" class="text-slate-300">Sedang menganalisis rasio pejabat toko...</p>
+                    </div>
+
+                    <div>
+                      <h4 class="font-bold text-blue-400 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-venus-mars"></i> 2. Analisa Gender & Proteksi Shift Malam
+                      </h4>
+                      <p id="analysisGenderText" class="text-slate-300">Sedang menganalisis rasio gender...</p>
+                    </div>
+
+                    <div>
+                      <h4 class="font-bold text-emerald-400 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-store-slash"></i> 3. Analisa Kelayakan Jam Operasional & Toko 24 Jam
+                      </h4>
+                      <p id="analysis24hText" class="text-slate-300">Sedang menganalisis kelayakan operasional...</p>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800/80">
+                      <h4 class="font-bold text-white flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i> Rekomendasi Penting untuk Kepala Toko (COS):
+                      </h4>
+                      <ul id="analysisRecommendations" class="list-disc pl-5 space-y-1 text-slate-300">
+                        <li>Jalankan simulasi untuk melihat analisa rekomendasi lengkap.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -560,6 +691,14 @@
           </div>
         </div>
 
+        <div>
+          <label for="empOffTerakhir" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Tanggal Off Terakhir
+          </label>
+          <input type="date" id="empOffTerakhir"
+                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition-all">
+        </div>
+
         <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
           <button type="button" onclick="closePersonnelModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
             Batal
@@ -581,6 +720,8 @@
     let isEditingPersonnel = false;
     let isSimulating = false;
 
+    let cachedSimulationList = [];
+
     function escapeHtml(text) {
       if (!text) return '';
       return String(text)
@@ -599,14 +740,6 @@
         return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
       }
       return str;
-    }
-
-    function formatCurrency(val) {
-      if (!val) return 'Belum tersedia';
-      const cleanDigits = String(val).replace(/[^\d]/g, '');
-      if (!cleanDigits) return val;
-      const num = parseInt(cleanDigits, 10);
-      return isNaN(num) ? val : `Rp ${num.toLocaleString('id-ID')}`;
     }
 
     function formatPeakHours(val) {
@@ -644,6 +777,27 @@
 
     function hideLoading() {
       document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    function toggle24HourMode() {
+      const select24 = document.getElementById('opToko24Jam');
+      const jamBukaInput = document.getElementById('opJamBuka');
+      const jamTutupInput = document.getElementById('opJamTutup');
+      const noteDiv = document.getElementById('twentyFourHourNote');
+
+      if (!select24 || !jamBukaInput || !jamTutupInput) return;
+
+      if (select24.value === 'YA') {
+        jamBukaInput.value = '00:00';
+        jamTutupInput.value = '23:59';
+        jamBukaInput.disabled = true;
+        jamTutupInput.disabled = true;
+        if (noteDiv) noteDiv.classList.remove('hidden');
+      } else {
+        jamBukaInput.disabled = false;
+        jamTutupInput.disabled = false;
+        if (noteDiv) noteDiv.classList.add('hidden');
+      }
     }
 
     async function fetchStores() {
@@ -718,7 +872,6 @@
       document.getElementById('profKodeToko').innerText = selectedStore.KODE_TOKO || '-';
       document.getElementById('profNamaToko').innerText = selectedStore.NAMA_TOKO || '-';
       document.getElementById('profAlamat').innerText = selectedStore.ALAMAT || '-';
-      document.getElementById('profSalesHarian').innerText = formatCurrency(selectedStore.SALES_HARIAN);
       document.getElementById('profPeakHours').innerText = formatPeakHours(selectedStore.PEAK_HOURS);
 
       switchTab('profile');
@@ -734,9 +887,10 @@
         if (result.success && result.data) {
           const op = result.data.operation;
           if (op) {
+            document.getElementById('opToko24Jam').value = op.TOKO_24_JAM || 'TIDAK';
             document.getElementById('opJamBuka').value = formatTime(op.JAM_BUKA);
             document.getElementById('opJamTutup').value = formatTime(op.JAM_TUTUP);
-            document.getElementById('opToko24Jam').value = op.TOKO_24_JAM || 'TIDAK';
+            toggle24HourMode();
           }
           currentEmployees = result.data.employees || [];
           renderEmployees(currentEmployees);
@@ -812,62 +966,298 @@
     }
 
     function renderSimulationResults(list) {
-      const tbody = document.getElementById('tblSimResults');
-      if (!tbody) return;
+      cachedSimulationList = list || [];
+      const wrapper = document.getElementById('matrixTableWrapper');
+      const btnDownload = document.getElementById('btnDownloadPDF');
+
+      if (!wrapper) return;
 
       if (!list || list.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="px-6 py-8 text-center text-slate-400">
-              Belum ada hasil simulasi shift untuk periode ini. Klik "Generate Simulasi Periode".
-            </td>
-          </tr>`;
+        wrapper.innerHTML = `
+          <div class="p-8 text-center text-slate-400">
+            <i class="fa-solid fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
+            <p class="text-xs font-semibold">Belum ada hasil simulasi shift untuk periode ini.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Klik "Generate & Clean Reset" untuk memproses alokasi AI.</p>
+          </div>`;
+        if (btnDownload) btnDownload.disabled = true;
+        renderAnalyticsInsight([]);
         return;
       }
 
-      tbody.innerHTML = list.map(item => {
-        const isOFF = item.SHIFT === 'OFF' || item.SHIFT === 'LIBUR';
-        const isManpowerAlert = item.SHIFT === 'MANPOWER INSUFFICIENT';
-        const isDataIncomplete = item.SHIFT === 'DATA INCOMPLETE';
-        const isValidationFailed = item.SHIFT === 'VALIDATION FAILED';
-        const isAlert = isManpowerAlert || isDataIncomplete || isValidationFailed;
-        const isAutoRepaired = item.ALASAN && item.ALASAN.includes('Auto-repaired');
+      if (btnDownload) btnDownload.disabled = false;
 
-        let badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-200';
-        if (isOFF) badgeStyle = 'bg-slate-200 text-slate-700 border-slate-300 font-bold';
-        if (isManpowerAlert) badgeStyle = 'bg-rose-100 text-rose-700 border-rose-200 font-bold';
-        if (isDataIncomplete) badgeStyle = 'bg-amber-100 text-amber-800 border-amber-200 font-bold';
-        if (isValidationFailed) badgeStyle = 'bg-purple-100 text-purple-800 border-purple-200 font-bold';
+      const dateSet = new Set();
+      const employeeMap = new Map();
 
-        return `
-          <tr class="hover:bg-slate-50/80 transition-colors ${isAlert ? 'bg-rose-50/30' : ''} ${isOFF ? 'bg-slate-50/40' : ''}">
-            <td class="px-6 py-4 font-semibold text-slate-700 whitespace-nowrap">${escapeHtml(item.TANGGAL)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="font-extrabold text-brand-700 bg-brand-50 border border-brand-100 px-2 py-0.5 rounded-md text-[11px]">
-                ${escapeHtml(item.KODE_TOKO)}
-              </span>
-            </td>
-            <td class="px-6 py-4 font-bold ${item.NAMA_PERSONIL === 'SYSTEM_ALERT' ? 'text-rose-600' : 'text-slate-900'} whitespace-nowrap">
-              ${escapeHtml(item.NAMA_PERSONIL)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-black tracking-wider border ${badgeStyle}">
-                ${escapeHtml(item.SHIFT)}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-xs ${isAlert ? 'text-rose-700 font-semibold' : 'text-slate-600'} leading-relaxed">
-              ${isAutoRepaired ? '<span class="inline-flex items-center gap-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold mr-1"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Repaired</span>' : ''}
-              ${escapeHtml(item.ALASAN)}
-            </td>
-          </tr>
+      list.forEach(item => {
+        if (item.TANGGAL) dateSet.add(item.TANGGAL);
+
+        const empName = item.NAMA_PERSONIL || 'UNKNOWN';
+        if (empName === 'SYSTEM_ALERT') return;
+
+        if (!employeeMap.has(empName)) {
+          const foundEmp = currentEmployees.find(e => String(e.NAMA_PERSONIL).toUpperCase() === String(empName).toUpperCase());
+          employeeMap.set(empName, {
+            jabatan: foundEmp ? foundEmp.JABATAN : 'STAFF',
+            shifts: {}
+          });
+        }
+        employeeMap.get(empName).shifts[item.TANGGAL] = item.SHIFT;
+      });
+
+      const dates = Array.from(dateSet).sort();
+
+      if (dates.length === 0) {
+        wrapper.innerHTML = `<p class="p-8 text-center text-xs text-slate-400">Pilih tanggal dan jalankan simulasi.</p>`;
+        renderAnalyticsInsight([]);
+        return;
+      }
+
+      let html = `
+        <table class="w-full border-collapse border border-slate-300 text-xs font-medium">
+          <thead>
+            <tr class="bg-slate-800 text-white text-center">
+              <th class="border border-slate-600 px-3 py-2 text-left min-w-[140px] font-bold">Nama Personil</th>
+              <th class="border border-slate-600 px-2 py-2 text-center min-w-[70px] font-bold">Jabatan</th>
+      `;
+
+      dates.forEach(d => {
+        const dayNum = parseInt(d.split('-')[2], 10);
+        const dayName = new Date(d).toLocaleDateString('id-ID', { weekday: 'short' });
+        html += `
+          <th class="border border-slate-600 px-2 py-1.5 text-center min-w-[42px]">
+            <div class="text-[10px] uppercase opacity-80">${dayName}</div>
+            <div class="text-sm font-extrabold">${dayNum}</div>
+          </th>
         `;
-      }).join('');
+      });
+
+      html += `</tr></thead><tbody class="divide-y divide-slate-200">`;
+
+      employeeMap.forEach((empObj, empName) => {
+        html += `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="border border-slate-300 px-3 py-2 font-bold text-slate-900 bg-slate-50/50">${escapeHtml(empName)}</td>
+            <td class="border border-slate-300 px-2 py-2 text-center text-[10px] font-extrabold bg-slate-100 text-slate-700 uppercase">${escapeHtml(empObj.jabatan)}</td>
+        `;
+
+        dates.forEach(d => {
+          const shiftCode = empObj.shifts[d] || '-';
+          let badgeClass = 'bg-slate-100 text-slate-700 font-bold';
+
+          if (shiftCode === 'OFF' || shiftCode === 'LIBUR') {
+            badgeClass = 'bg-slate-200 text-slate-600 font-bold';
+          } else if (shiftCode.includes('S07')) {
+            badgeClass = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-black';
+          } else if (shiftCode.includes('S14')) {
+            badgeClass = 'bg-blue-100 text-blue-800 border border-blue-300 font-black';
+          } else if (shiftCode.includes('S22') || shiftCode.includes('NIGHT')) {
+            badgeClass = 'bg-purple-100 text-purple-800 border border-purple-300 font-black';
+          } else if (shiftCode.includes('FAILED') || shiftCode.includes('INSUFFICIENT')) {
+            badgeClass = 'bg-rose-100 text-rose-700 font-bold';
+          }
+
+          html += `
+            <td class="border border-slate-300 px-1 py-2 text-center">
+              <span class="inline-block px-1.5 py-0.5 rounded text-[10px] tracking-wider ${badgeClass}">
+                ${escapeHtml(shiftCode)}
+              </span>
+            </td>
+          `;
+        });
+
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table>`;
+      wrapper.innerHTML = html;
+
+      // Render Analisa Insight & Kelayakan Toko Tajam dibawah tabel
+      renderAnalyticsInsight(list);
+    }
+
+    /**
+     * MENGHASILKAN ANALISA KELAYAKAN TOKO & ROSTER HEALTH TAJAM BERDASARKAN SELURUH BUSINESS RULES
+     */
+    function renderAnalyticsInsight(shiftList) {
+      const activeEmps = currentEmployees.filter(e => String(e.STATUS).toUpperCase() === 'ACTIVE');
+      const is24Hours = document.getElementById('opToko24Jam')?.value === 'YA';
+
+      // 1. Hitung Jumlah Pejabat & Staff
+      let cosCount = 0;
+      let acosCount = 0;
+      let mdFreshCount = 0;
+      let crewCount = 0;
+
+      let maleCount = 0;
+      let femaleCount = 0;
+
+      activeEmps.forEach(e => {
+        const j = String(e.JABATAN).toUpperCase().trim();
+        const g = String(e.GENDER || '').toUpperCase().trim();
+
+        if (j === 'COS') cosCount++;
+        else if (j === 'ACOS') acosCount++;
+        else if (j === 'MD FRESH' || j === 'MDFRESH') mdFreshCount++;
+        else crewCount++;
+
+        if (g === 'PEREMPUAN' || g === 'FEMALE' || g === 'P') femaleCount++;
+        else maleCount++;
+      });
+
+      const totalActivePejabat = cosCount + acosCount + mdFreshCount;
+      const totalStaff = activeEmps.length;
+
+      // Update Statistic Cards UI
+      document.getElementById('statMppVal').innerText = `${totalStaff} Personil`;
+      document.getElementById('statPejabatVal').innerText = `${totalActivePejabat} / 4 Ideal`;
+      document.getElementById('statGenderVal').innerText = `${maleCount}L / ${femaleCount}P`;
+
+      // 2. Evaluasi Rasio Pejabat
+      // Ideal: COS = 1, ACOS = 2, MD FRESH >= 1 (Total = 4 Pejabat)
+      let pejabatStatus = 'IDEAL';
+      let pejabatText = '';
+      const pejabatRecommendations = [];
+
+      if (cosCount === 1 && acosCount === 2 && mdFreshCount >= 1) {
+        pejabatStatus = 'IDEAL';
+        pejabatText = `Struktur pejabat toko <strong>SANGAT IDEAL</strong> (1 COS, ${acosCount} ACOS, dan ${mdFreshCount} MD FRESH). Ketersediaan supervisi sangat kuat untuk mengover shift Pagi, Siang, maupun Malam tanpa terjadi kekosongan penanggung jawab toko.`;
+      } else {
+        pejabatStatus = 'SUBOPTIMAL';
+        let gaps = [];
+        if (cosCount < 1) gaps.push('Kekurangan COS (1 Orang)');
+        if (cosCount > 1) gaps.push('Kelebihan COS');
+        if (acosCount < 2) gaps.push(`Kekurangan ACOS (${2 - acosCount} Orang lagi untuk mencapai ideal 2 ACOS)`);
+        if (mdFreshCount < 1) gaps.push('Kekurangan MD FRESH (Min 1 Orang)');
+
+        pejabatText = `Struktur pejabat saat ini <strong>${pejabatStatus}</strong> (${cosCount} COS, ${acosCount} ACOS, ${mdFreshCount} MD FRESH). Catatan Evaluasi: ${gaps.join(', ')}. `;
+        if (totalActivePejabat < 3) {
+          pejabatText += `Jumlah total pejabat (${totalActivePejabat} orang) berisiko tinggi menyebabkan rotasi shift overwork pada pejabat yang ada untuk menjaga kaidah minimal 1 Pejabat per shift.`;
+          pejabatRecommendations.push(`Diusulkan penambahan pejabat toko (khususnya ACOS/MD FRESH) agar rotasi supervisi berjalan adil.`);
+        }
+      }
+
+      // 3. Evaluasi Gender & Shift Malam (Wanita dilarang shift malam)
+      let genderText = `Toko memiliki ${maleCount} Personil Pria dan ${femaleCount} Personil Wanita. `;
+      if (femaleCount === 0) {
+        genderText += `Seluruh staf ber-gender Pria. Fleksibilitas alokasi shift malam sangat tinggi tanpa ada batasan regulasi gender.`;
+      } else {
+        const maleRatio = totalStaff > 0 ? (maleCount / totalStaff) * 100 : 0;
+        if (is24Hours) {
+          if (maleCount < 3) {
+            genderText += `<span class="text-rose-400 font-bold">[CRITICAL WARNING]</span> Jumlah staf pria hanya ${maleCount} orang. Untuk toko 24 jam, ini sangat berisiko karena seluruh Shift Malam (S22) WAJIB diisi oleh pria. Staf pria akan mengalami beban shift malam berlebih dan berpotensi melanggar jeda istirahat (Rest Time).`;
+            pejabatRecommendations.push(`Tambahkan staf Pria minimal menjadi 3-4 orang untuk menjaga rotasi Shift Malam toko 24 jam.`);
+          } else {
+            genderText += `Jumlah staf pria (${maleCount} orang) mencukupi untuk mengover alokasi Shift Malam (S22) secara bergantian sesuai aturan proteksi gender.`;
+          }
+        } else {
+          genderText += `Untuk toko Non-24 Jam (Shift Pagi & Siang), rasio gender saat ini aman dan terdistribusi adil.`;
+        }
+      }
+
+      // 4. Evaluasi Kelayakan Toko 24 Jam
+      let feasibility24h = 'LAYAK';
+      let feasibilityText = '';
+      const minStaff24h = 8; // Minimal 8 orang untuk toko 24 jam agar adil
+
+      if (is24Hours) {
+        if (totalStaff < minStaff24h) {
+          feasibility24h = 'TIDAK LAYAK';
+          feasibilityText = `<span class="text-rose-400 font-bold">[TIDAK LAYAK OPERASIONAL 24 JAM]</span> Total MPP (${totalStaff} orang) di bawah ambang batas minimal (${minStaff24h} orang). Mengoperasikan toko 24 jam dengan MPP ini akan memaksa personil bekerja >5 hari berturut-turut atau memicu pelanggaran Rest Time (Malam ke Pagi).`;
+          pejabatRecommendations.push(`Pengajuan penambahan MPP ke Area Manager / HR, atau evaluasi penutupan sementara operasional 24 jam menjadi reguler.`);
+        } else if (maleCount < 3) {
+          feasibility24h = 'RISK / BERSYARAT';
+          feasibilityText = `<span class="text-amber-400 font-bold">[BERSYARAT / RISIKO SHIFT MALAM]</span> MPP mencukupi (${totalStaff} orang), namun ketersediaan Pria minimal rentan kelelahan.`;
+        } else {
+          feasibility24h = 'SANGAT LAYAK';
+          feasibilityText = `Toko <strong>SANGAT LAYAK & AMAN</strong> beroperasi 24 Jam. Komposisi MPP (${totalStaff} staf), rasio pejabat (${totalActivePejabat} orang), dan kecukupan pria memadahi untuk menopang 3 shift penuh secara adil.`;
+        }
+      } else {
+        if (totalStaff < 5) {
+          feasibility24h = 'MPP MINIMAL';
+          feasibilityText = `Toko Non-24 Jam dengan MPP (${totalStaff} orang) tergolong amat ketat. Membutuhkan kedisiplinan jadwal agar setiap shift terisi min 1 pejabat dan crew.`;
+        } else {
+          feasibility24h = 'SANGAT LAYAK';
+          feasibilityText = `Toko <strong>LAYAK & OPTIMAL</strong> beroperasi reguler (2 Shift). Komposisi tim sangat memadahi untuk rotasi Pagi (S07) dan Siang (S14).`;
+        }
+      }
+
+      document.getElementById('stat24hVal').innerText = feasibility24h;
+
+      // Update Overall Health Badge
+      const badgeElem = document.getElementById('overallHealthBadge');
+      if (feasibility24h === 'SANGAT LAYAK' && pejabatStatus === 'IDEAL') {
+        badgeElem.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        badgeElem.innerText = 'STATUS ROSTER: OPTIMAL & LAYAK';
+      } else if (feasibility24h === 'TIDAK LAYAK') {
+        badgeElem.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        badgeElem.innerText = 'STATUS ROSTER: BERISIKO / OVERLOAD';
+      } else {
+        badgeElem.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        badgeElem.innerText = 'STATUS ROSTER: PERLU PENYESUAIAN Tim';
+      }
+
+      // Default Recommendations if empty
+      if (pejabatRecommendations.length === 0) {
+        pejabatRecommendations.push(`Jadwal hasil generasi AI sudah memenuhi seluruh aturan bisnis (Anti Double OFF, Minimal 1 Pejabat Per Shift, Proteksi Wanita & Rest Time).`);
+        pejabatRecommendations.push(`Kepala Toko (COS) dapat mengunduh PDF Jadwal dan menempelkannya di papan pengumuman toko.`);
+      }
+
+      // Set Text Content to UI
+      document.getElementById('analysisPejabatText').innerHTML = pejabatText;
+      document.getElementById('analysisGenderText').innerHTML = genderText;
+      document.getElementById('analysis24hText').innerHTML = feasibilityText;
+
+      const recUl = document.getElementById('analysisRecommendations');
+      recUl.innerHTML = pejabatRecommendations.map(r => `<li>${r}</li>`).join('');
+    }
+
+    function downloadRosterPDF() {
+      if (!cachedSimulationList || cachedSimulationList.length === 0) {
+        showToast('Tidak ada data simulasi untuk didownload', 'error');
+        return;
+      }
+
+      showLoading('Menyiapkan file PDF untuk di-download...');
+
+      const element = document.getElementById('pdfExportContainer');
+      const pdfHeader = document.getElementById('pdfHeader');
+      const startDate = document.getElementById('simStartDate')?.value || '';
+      const endDate = document.getElementById('simEndDate')?.value || '';
+      const targetStoreCode = selectedStore ? selectedStore.KODE_TOKO : 'ALL';
+      const targetStoreName = selectedStore ? selectedStore.NAMA_TOKO : 'Semua Toko';
+
+      if (pdfHeader) {
+        document.getElementById('pdfStoreName').innerText = `TOKO: ${targetStoreCode} - ${targetStoreName}`;
+        document.getElementById('pdfPeriod').innerText = `PERIODE: ${startDate} s/d ${endDate}`;
+        pdfHeader.classList.remove('hidden');
+      }
+
+      const fileName = `Jadwal_Shift_Alfamidi_${targetStoreCode}_${startDate}_sd_${endDate}.pdf`;
+
+      const opt = {
+        margin:       [0.3, 0.3, 0.3, 0.3],
+        filename:     fileName,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        if (pdfHeader) pdfHeader.classList.add('hidden');
+        hideLoading();
+        showToast('File PDF berhasil didownload!', 'success');
+      }).catch(err => {
+        if (pdfHeader) pdfHeader.classList.add('hidden');
+        hideLoading();
+        showToast('Gagal menggenerate PDF: ' + err.toString(), 'error');
+      });
     }
 
     function renderEmployees(list) {
       const tbody = document.getElementById('tblPersonnel');
       if (!list || list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada personil.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Belum ada personil.</td></tr>`;
         return;
       }
       tbody.innerHTML = list.map(emp => `
@@ -875,6 +1265,7 @@
           <td class="px-6 py-4 font-bold text-slate-900">${escapeHtml(emp.NAMA_PERSONIL)}</td>
           <td class="px-6 py-4"><span class="px-2 py-0.5 rounded bg-slate-100 font-bold">${escapeHtml(emp.JABATAN)}</span></td>
           <td class="px-6 py-4">${escapeHtml(emp.GENDER)}</td>
+          <td class="px-6 py-4 font-semibold text-slate-600">${escapeHtml(emp.OFF_TERAKHIR || '-')}</td>
           <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${emp.STATUS === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${escapeHtml(emp.STATUS)}</span></td>
           <td class="px-6 py-4 text-right">
             <button onclick="openEditPersonnelModal('${escapeHtml(emp.NAMA_PERSONIL)}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-bold">Edit</button>
@@ -929,6 +1320,7 @@
       document.getElementById('modalPersonnelTitle').innerText = 'Tambah Personil Baru';
       document.getElementById('formPersonnel').reset();
       document.getElementById('empOriginalNama').value = '';
+      document.getElementById('empOffTerakhir').value = '';
       document.getElementById('modalPersonnel').classList.remove('hidden');
     }
 
@@ -942,6 +1334,7 @@
       document.getElementById('empJabatan').value = emp.JABATAN;
       document.getElementById('empGender').value = emp.GENDER;
       document.getElementById('empStatus').value = emp.STATUS;
+      document.getElementById('empOffTerakhir').value = emp.OFF_TERAKHIR || '';
       document.getElementById('modalPersonnel').classList.remove('hidden');
     }
 
@@ -959,7 +1352,8 @@
         namaPersonil: document.getElementById('empNama').value,
         jabatan: document.getElementById('empJabatan').value,
         gender: document.getElementById('empGender').value,
-        status: document.getElementById('empStatus').value
+        status: document.getElementById('empStatus').value,
+        offTerakhir: document.getElementById('empOffTerakhir').value
       };
       const action = isEditingPersonnel ? 'updateEmployee' : 'saveEmployee';
       try {
@@ -1074,11 +1468,11 @@
       if (btn) btn.disabled = true;
       if (progressContainer) progressContainer.classList.remove('hidden');
       if (progressBar) progressBar.style.width = '20%';
-      if (progressStatus) progressStatus.innerText = 'Mengirimkan permintaan simulasi AI...';
+      if (progressStatus) progressStatus.innerText = 'Membersihkan data lama & mengirimkan permintaan simulasi AI...';
       if (progressPercent) progressPercent.innerText = '20%';
-      if (progressDetail) progressDetail.innerText = 'Memproses permintaan di backend Google Apps Script...';
+      if (progressDetail) progressDetail.innerText = 'Memproses reset sheet SHIFT_RESULT & simulasi AI...';
 
-      showLoading('Menjalankan simulasi shift AI & validasi...');
+      showLoading('Membersihkan data lama & memproses simulasi...');
 
       try {
         const payload = {
@@ -1089,7 +1483,7 @@
 
         if (progressBar) progressBar.style.width = '60%';
         if (progressPercent) progressPercent.innerText = '60%';
-        if (progressStatus) progressStatus.innerText = 'AI sedang mengoptimasi jadwal shift & validasi aturan...';
+        if (progressStatus) progressStatus.innerText = 'AI sedang mengoptimasi jadwal shift & validasi keadilan tim...';
 
         const res = await fetch(`${API_URL}?action=generateSimulatedShifts`, {
           method: 'POST',
@@ -1103,7 +1497,7 @@
         if (progressPercent) progressPercent.innerText = '100%';
 
         if (result.success) {
-          showToast(result.message || 'Simulasi shift berhasil dilakukan!', 'success');
+          showToast(result.message || 'Simulasi shift berhasil diperbarui!', 'success');
           if (Array.isArray(result.data)) {
             renderSimulationResults(result.data);
           } else {
